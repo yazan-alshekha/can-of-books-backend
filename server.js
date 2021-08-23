@@ -9,6 +9,48 @@ const jwksClient = require('jwks-rsa');
 const app = express();
 app.use(cors());
 
+const mongoose = require('mongoose');
+
+// import model
+const BookModel=require('./modul/Book.js');
+
+
+// connect to dataBase
+mongoose.connect("mongodb://localhost:27017/BookDataBase", { useNewUrlParser: true });
+
+
+
+
+function seadDataCollection(){
+  // title: String,
+  // description: String,
+  // email: String,
+  let data1=new BookModel({
+    email:"yazan@ltuc.com",
+    title: "the another life",
+    description:"knsdkfnskfnslfsfjjgknfbnb"
+  });
+
+  let data2=new BookModel({
+    email:"yazan@ltuc.com",
+    title: "the another life",
+    description:"knsdkfnskfnslfsfjjgknfbnb"
+  });
+
+  let data3=new BookModel({
+    email:"yazan@ltuc.com",
+    title: "the another life",
+    description:"knsdkfnskfnslfsfjjgknfbnb"
+  });
+
+  data1.save();
+  data2.save();
+  data3.save();
+
+}
+//use  npm start just to sead data one time to dataBase 
+seadDataCollection() 
+
 const PORT = process.env.PORT || 3001;
 
 app.get('/test', (request, response) => {
@@ -20,5 +62,10 @@ app.get('/test', (request, response) => {
   // STEP 3: to prove that everything is working correctly, send the opened jwt back to the front-end
 
 })
+
+
+
+
+
 
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
