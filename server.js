@@ -11,8 +11,11 @@ app.use(cors());
 
 const mongoose = require('mongoose');
 
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`listening on ${PORT}`));
+
 // import model
-const BookModel=require('./modul/Book.js');
+const BookModel = require('./modul/Book.js');
 
 
 // connect to dataBase
@@ -21,26 +24,26 @@ mongoose.connect("mongodb://localhost:27017/BookDataBase", { useNewUrlParser: tr
 
 
 
-function seadDataCollection(){
+function seadDataCollection() {
   // title: String,
   // description: String,
   // email: String,
-  let data1=new BookModel({
-    email:"yazan@ltuc.com",
+  let data1 = new BookModel({
+    email: "yazan.alshekha@outlook.com",
     title: "the another life",
-    description:"knsdkfnskfnslfsfjjgknfbnb"
+    description: "knsdkfnskfnslfsfjjgknfbnb"
   });
 
-  let data2=new BookModel({
-    email:"yazan@ltuc.com",
+  let data2 = new BookModel({
+    email: "yazan@ltuc.com",
     title: "the another life",
-    description:"knsdkfnskfnslfsfjjgknfbnb"
+    description: "knsdkfnskfnslfsfjjgknfbnb"
   });
 
-  let data3=new BookModel({
-    email:"yazan@ltuc.com",
+  let data3 = new BookModel({
+    email: "yazan@ltuc.com",
     title: "the another life",
-    description:"knsdkfnskfnslfsfjjgknfbnb"
+    description: "knsdkfnskfnslfsfjjgknfbnb"
   });
 
   data1.save();
@@ -49,9 +52,9 @@ function seadDataCollection(){
 
 }
 //use  npm start just to sead data one time to dataBase 
-seadDataCollection() 
+//  seadDataCollection() 
 
-const PORT = process.env.PORT || 3001;
+
 
 app.get('/test', (request, response) => {
 
@@ -64,8 +67,16 @@ app.get('/test', (request, response) => {
 })
 
 
+app.get('/book', getBookData);
 
+function getBookData(req, res) {
+  let userName = req.query.userName;
+  console.log(userName);
+  BookModel.find({ email: userName }, (err, user) => {
+    if (err)
+      console.log(err);
+    else
+      res.send(user);
+  });
 
-
-
-app.listen(PORT, () => console.log(`listening on ${PORT}`));
+}
