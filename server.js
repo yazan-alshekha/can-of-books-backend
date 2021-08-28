@@ -28,6 +28,10 @@ mongoose.connect("mongodb://localhost:27017/BookDataBase", { useNewUrlParser: tr
 // api routes
 app.get('/book', getBookData);
 app.post('/addBook', addingBookHandler);
+app.delete('/deleteBook/:id', deleteBookHandler);
+
+
+
 
 function seadDataCollection() {
   // title: String,
@@ -71,7 +75,7 @@ app.get('/test', (request, response) => {
   // STEP 2. use the jsonwebtoken library to verify that it is a valid jwt
   // jsonwebtoken dock - https://www.npmjs.com/package/jsonwebtoken
   // STEP 3: to prove that everything is working correctly, send the opened jwt back to the front-end
-
+  response.send('test')
 })
 
 
@@ -112,11 +116,36 @@ async function addingBookHandler(req, res) {
   await BookModel.create({ title: bookTitlename, description, email: ownerName, availability });
 
   // let data = await getAllData(ownerName);
-  
-  BookModel.find( {email: ownerName }, (err, user) => {
+
+  BookModel.find({ email: ownerName }, (err, user) => {
     if (err)
       console.log(err);
     else
-      res.send( user);
+      res.send(user);
   });
 }
+
+
+function deleteBookHandler(req, res) {
+  let ownerName1 = req.query.ownerName;
+
+  let id = req.params.id;
+  console.log(id,ownerName1);
+  
+  
+  
+
+  BookModel.remove({ _id: id }, (err, bookData) => {
+    if (err) {
+      console.log('error in deleting data');
+    }
+    else {
+      BookModel.find({ email:ownerName1 }, (err, bookData) => {
+        res.send(bookData);
+      });
+    }
+
+  });
+
+}
+
