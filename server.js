@@ -14,6 +14,10 @@ const mongoose = require('mongoose');
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`listening on ${PORT}`));
 
+// Middleware (to parse the request body)
+app.use(express.json());
+
+
 // import model
 const BookModel = require('./modul/Book.js');
 
@@ -21,8 +25,9 @@ const BookModel = require('./modul/Book.js');
 // connect to dataBase
 mongoose.connect("mongodb://localhost:27017/BookDataBase", { useNewUrlParser: true });
 
-
-
+// api routes
+app.get('/book', getBookData);
+app.post('/addBook', addingBookHandler);
 
 function seadDataCollection() {
   // title: String,
@@ -31,19 +36,22 @@ function seadDataCollection() {
   let data1 = new BookModel({
     email: "yazan.alshekha@outlook.com",
     title: "the another life",
-    description: "knsdkfnskfnslfsfjjgknfbnb"
+    description: "knsdkfnskfnslfsfjjgknfbnb",
+    availability: "unavailable",
   });
 
   let data2 = new BookModel({
     email: "yazan@ltuc.com",
     title: "the another life",
-    description: "knsdkfnskfnslfsfjjgknfbnb"
+    description: "knsdkfnskfnslfsfjjgknfbnb",
+    availability: "available",
   });
 
   let data3 = new BookModel({
     email: "yazan@ltuc.com",
     title: "the another life",
-    description: "knsdkfnskfnslfsfjjgknfbnb"
+    description: "knsdkfnskfnslfsfjjgknfbnb",
+    availability: "available",
   });
 
   data1.save();
@@ -67,7 +75,7 @@ app.get('/test', (request, response) => {
 })
 
 
-app.get('/book', getBookData);
+
 
 function getBookData(req, res) {
   let userName = req.query.userName;
@@ -79,4 +87,36 @@ function getBookData(req, res) {
       res.send(user);
   });
 
+}
+
+
+function getAllData(ownerName) {
+
+  BookModel.find({ email: ownerName }, (err, user) => {
+    if (err)
+      console.log(err);
+    else
+
+      return user;
+  });
+}
+
+
+
+
+async function addingBookHandler(req, res) {
+  console.log("addBook");
+
+  let { bookTitlename, description, ownerName, availability } = req.body;
+  console.log(bookTitlename, description, ownerName, availability);
+  await BookModel.create({ title: bookTitlename, description, email: ownerName, availability });
+
+  // let data = await getAllData(ownerName);
+  
+  BookModel.find( {email: ownerName }, (err, user) => {
+    if (err)
+      console.log(err);
+    else
+      res.send( user);
+  });
 }
