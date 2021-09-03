@@ -23,13 +23,13 @@ const BookModel = require('./modul/Book.js');
 
 
 // connect to dataBase
-mongoose.connect("mongodb://localhost:27017/BookDataBase", { useNewUrlParser: true });
+mongoose.connect(process.env.mongo_link, { useNewUrlParser: true });
 
 // api routes
 app.get('/book', getBookData);
 app.post('/addBook', addingBookHandler);
 app.delete('/deleteBook/:id', deleteBookHandler);
-
+app.put('/update', updateBook);
 
 
 
@@ -45,14 +45,14 @@ function seadDataCollection() {
   });
 
   let data2 = new BookModel({
-    email: "yazan@ltuc.com",
-    title: "the another life",
+    email: "samsung.sh9955@gmail.com",
+    title: "green land",
     description: "knsdkfnskfnslfsfjjgknfbnb",
     availability: "available",
   });
 
   let data3 = new BookModel({
-    email: "yazan@ltuc.com",
+    email: "samsung.sh9955@gmail.com",
     title: "the another life",
     description: "knsdkfnskfnslfsfjjgknfbnb",
     availability: "available",
@@ -67,7 +67,6 @@ function seadDataCollection() {
 //  seadDataCollection() 
 
 
-
 app.get('/test', (request, response) => {
 
   // TODO: 
@@ -77,8 +76,6 @@ app.get('/test', (request, response) => {
   // STEP 3: to prove that everything is working correctly, send the opened jwt back to the front-end
   response.send('test')
 })
-
-
 
 
 function getBookData(req, res) {
@@ -93,19 +90,22 @@ function getBookData(req, res) {
 
 }
 
-
-function getAllData(ownerName) {
-
-  BookModel.find({ email: ownerName }, (err, user) => {
+// helper function 
+async function getAllData(ownerName) {
+  let BooksArr = [];
+  await BookModel.find({email:ownerName}, (err, user) => {
     if (err)
       console.log(err);
-    else
-
-      return user;
+    else {
+      BooksArr=user;
+    }
   });
+
+  return BooksArr;
 }
 
 
+// getAllData('samsung.sh9955@gmail.com').then(data => console.log(data));
 
 
 async function addingBookHandler(req, res) {
@@ -117,35 +117,51 @@ async function addingBookHandler(req, res) {
 
   // let data = await getAllData(ownerName);
 
-  BookModel.find({ email: ownerName }, (err, user) => {
-    if (err)
-      console.log(err);
-    else
-      res.send(user);
-  });
+  // BookModel.find({ email: ownerName }, (err, user) => {
+  //   if (err)
+  //     console.log(err);
+  //   else
+  //     res.send(user);
+  // });
+  getAllData(ownerName).then((data)=> res.send(data));
 }
 
 
 function deleteBookHandler(req, res) {
   let ownerName1 = req.query.ownerName;
-
   let id = req.params.id;
-  console.log(id,ownerName1);
-  
-  
-  
-
+  // console.log(id,ownerName1);
   BookModel.remove({ _id: id }, (err, bookData) => {
     if (err) {
       console.log('error in deleting data');
     }
     else {
-      BookModel.find({ email:ownerName1 }, (err, bookData) => {
-        res.send(bookData);
-      });
+      // BookModel.find({ email: ownerName1 }, (err, bookData) => {
+      //   res.send(bookData);
+      // });
+      getAllData(ownerName1).then((data)=> res.send(data));
     }
 
   });
 
 }
+
+async function updateBook(req, res) {
+  let { id, title, description, email, availability } = req.body;
+
+  await BookModel.findByIdAndUpdate(id, { title, description, availability }, (err, bookData) => {
+    if (err) {
+      console.log(err);
+    }
+  });
+
+  // BookModel.find({ email }, (err, books) => {
+  //   if (err)
+  //     console.log('error in get data (updateBook function)');
+  //   else
+  //     res.send(books);
+  // });
+  getAllData(email).then((data)=> res.send(data));
+}
+
 
