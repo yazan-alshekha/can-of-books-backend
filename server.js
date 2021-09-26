@@ -23,7 +23,7 @@ const BookModel = require('./modul/Book.js');
 
 
 // connect to dataBase
-mongoose.connect(process.env.mongo_link, { useNewUrlParser: true });
+mongoose.connect(process.env.mongo_link_globally, { useNewUrlParser: true });
 
 // api routes
 app.get('/book', getBookData);
@@ -46,7 +46,7 @@ function seadDataCollection() {
 
   let data2 = new BookModel({
     email: "samsung.sh9955@gmail.com",
-    title: "green land",
+    title: "green ",
     description: "knsdkfnskfnslfsfjjgknfbnb",
     availability: "available",
   });
@@ -65,6 +65,13 @@ function seadDataCollection() {
 }
 //use  npm start just to sead data one time to dataBase 
 //  seadDataCollection() 
+
+
+app.get('/seadData',(req,res)=>{
+  seadDataCollection() ;
+  console.log('sead data are done ');
+  res.send('done');
+})
 
 
 app.get('/test', (request, response) => {
@@ -91,17 +98,17 @@ function getBookData(req, res) {
 }
 
 // helper function 
-async function getAllData(ownerName) {
-  let BooksArr = [];
-  await BookModel.find({email:ownerName}, (err, user) => {
+ function getAllData(ownerName) {
+  // let BooksArr = [];
+  return BookModel.find({ email: ownerName }, (err, user) => {
     if (err)
       console.log(err);
     else {
-      BooksArr=user;
+      // console.log(user,'user data');
+      return user;
     }
-  });
+  })
 
-  return BooksArr;
 }
 
 
@@ -115,36 +122,45 @@ async function addingBookHandler(req, res) {
   console.log(bookTitlename, description, ownerName, availability);
   await BookModel.create({ title: bookTitlename, description, email: ownerName, availability });
 
-  // let data = await getAllData(ownerName);
-
-  // BookModel.find({ email: ownerName }, (err, user) => {
-  //   if (err)
-  //     console.log(err);
-  //   else
-  //     res.send(user);
-  // });
-  getAllData(ownerName).then((data)=> res.send(data));
+  let userData= await getAllData(ownerName);
+    console.log(userData,'create  api');
+    res.json(userData);
 }
 
 
 function deleteBookHandler(req, res) {
-  let ownerName1 = req.query.ownerName;
+  let ownerName = req.query.ownerName;
   let id = req.params.id;
   // console.log(id,ownerName1);
-  BookModel.remove({ _id: id }, (err, bookData) => {
+  BookModel.findByIdAndDelete( id ,async (err, bookData) => {
     if (err) {
       console.log('error in deleting data');
+      res.status(500).send("an error occured");
     }
-    else {
-      // BookModel.find({ email: ownerName1 }, (err, bookData) => {
-      //   res.send(bookData);
-      // });
-      getAllData(ownerName1).then((data)=> res.send(data));
-    }
+    // let catsList= await BookModel.find({email: ownerName});
+    let userData= await getAllData(ownerName);
+    console.log(userData,'delete api');
+    res.json(userData);
 
   });
 
 }
+
+// const deleteCatController=  (req,res)=>{
+//   let id=req.params.id;
+//   catModel.findByIdAndDelete(id,async (err,data)=>{
+//       if(err){
+//           res.status(500).send("an error occured");
+//       }
+//       let catsList= await catModel.find({});
+//       res.json(catsList);
+         
+//   })
+// }
+
+
+
+
 
 async function updateBook(req, res) {
   let { id, title, description, email, availability } = req.body;
@@ -161,7 +177,9 @@ async function updateBook(req, res) {
   //   else
   //     res.send(books);
   // });
-  getAllData(email).then((data)=> res.send(data));
+  let userData= await getAllData(email);
+    console.log(userData,'update api');
+    res.json(userData);
 }
 
 
